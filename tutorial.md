@@ -1,15 +1,3 @@
-### Relatório de Correção Técnica
-
-**Tabela de Alterações Realizadas**
-| ID da Correção | Localização Descrita                                         | Trecho Original (com erro)        | Trecho Corrigido        |
-| -------------- | ------------------------------------------------------------ | --------------------------------- | ----------------------- |
-| 1              | Passo 5, no bloco de instrução do `DeveloperAgent`           | `from .agent import root_agent`   | `from . import agent`   |
-| 2              | Passo 8, no bloco de código para `adk_forge/__init__.py`     | `from .agent import root_agent`   | `from . import agent`   |
-| 3              | Passo 10, no comentário da seção 'Estrutura para Deploy ADK' | `# from .agent import root_agent` | `# from . import agent` |
-
----
-### Tutorial Corrigido
-
 # Tutorial Completo: ADK-Forge - Sistema de Geração Automática de Agentes ADK (100% Conformidade)
 
 ## Introdução
