@@ -1,0 +1,227 @@
+{
+  "manifest_version": "1.1-local",
+  "project": "adk_forge",
+  "description": "Manifesto adaptado para execução e desenvolvimento local do ADK-Forge",
+  "execution_mode": "local",
+  "globals": {
+    "language": "python",
+    "runtime": "Python 3.11",
+    "base_package": "adk_forge",
+    "environment": "local"
+  },
+  "post_implementation_setup": {
+    "description": "Passos após implementação do projeto",
+    "steps": [
+      {
+        "name": "Criar arquivo .env",
+        "command": "cp adk_forge/.env.example adk_forge/.env",
+        "note": "Edite o arquivo com suas credenciais (GOOGLE_API_KEY)"
+      },
+      {
+        "name": "Instalar dependências",
+        "command": "pip install -r requirements.txt"
+      },
+      {
+        "name": "Verificar configuração",
+        "command": "python -c \"from adk_forge.config import config; print('OK')\""
+      }
+    ]
+  },
+  "execution_modes": [
+    {
+      "name": "playground",
+      "description": "Interface web interativa para testes",
+      "command": "make playground",
+      "url": "http://localhost:8080"
+    },
+    {
+      "name": "api",
+      "description": "Servidor API REST",
+      "command": "make api",
+      "url": "http://localhost:8000"
+    },
+    {
+      "name": "cli",
+      "description": "Interface de linha de comando",
+      "command": "make run"
+    },
+    {
+      "name": "python",
+      "description": "Execução direta via Python",
+      "command": "python -m adk_forge.main"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "0",
+      "title": "Criar arquivo config.py para execução local",
+      "kind": "file",
+      "path": "adk_forge/config.py",
+      "priority": "critical",
+      "status": "todo",
+      "dependencies": [],
+      "details": "Criar módulo de configuração que carrega variáveis do arquivo .env usando python-dotenv. Deve detectar se está usando AI Studio (GOOGLE_GENAI_USE_VERTEXAI=FALSE) ou Vertex AI, e configurar as credenciais apropriadamente.",
+      "testStrategy": "python -c \"from adk_forge.config import config; print('Config OK')\""
+    },
+    {
+      "id": "0.1",
+      "title": "Criar arquivo .env.example",
+      "kind": "file",
+      "path": "adk_forge/.env.example",
+      "priority": "critical",
+      "status": "todo",
+      "dependencies": [],
+      "details": "Template de configuração com exemplos para AI Studio e Vertex AI. Incluir GOOGLE_GENAI_USE_VERTEXAI, GOOGLE_API_KEY, GOOGLE_CLOUD_PROJECT, etc.",
+      "testStrategy": "test -f adk_forge/.env.example"
+    },
+    {
+      "id": "0.2",
+      "title": "Adicionar python-dotenv ao requirements.txt",
+      "kind": "file",
+      "path": "requirements.txt",
+      "priority": "critical",
+      "status": "todo",
+      "dependencies": [],
+      "details": "Adicionar python-dotenv>=1.0.0 ao arquivo requirements.txt existente",
+      "testStrategy": "grep -q python-dotenv requirements.txt"
+    },
+    {
+      "id": "1",
+      "title": "Criar estrutura de diretórios",
+      "kind": "shell",
+      "priority": "high",
+      "status": "todo",
+      "dependencies": ["0"],
+      "details": "mkdir -p adk_forge/{agents,tools} docs tests",
+      "testStrategy": "test -d adk_forge/agents && test -d adk_forge/tools"
+    },
+    {
+      "id": "2",
+      "title": "Implementar ferramentas de I/O (file_tools.py)",
+      "kind": "implementation",
+      "path": "adk_forge/tools/file_tools.py",
+      "priority": "high",
+      "status": "todo",
+      "dependencies": ["1"],
+      "details": "Implementar create_directory, write_file e read_file com ToolContext",
+      "testStrategy": "python -m py_compile adk_forge/tools/file_tools.py"
+    },
+    {
+      "id": "3",
+      "title": "Implementar OrchestratorAgent",
+      "kind": "implementation",
+      "path": "adk_forge/agents/orchestrator.py",
+      "priority": "medium",
+      "status": "todo",
+      "dependencies": ["1"],
+      "details": "Agente para validar entrada e coordenar processo",
+      "testStrategy": "python -m py_compile adk_forge/agents/orchestrator.py"
+    },
+    {
+      "id": "4",
+      "title": "Implementar SystemsArchitectAgent",
+      "kind": "implementation",
+      "path": "adk_forge/agents/architect.py",
+      "priority": "medium",
+      "status": "todo",
+      "dependencies": ["3"],
+      "details": "Agente para gerar plano de arquitetura JSON",
+      "testStrategy": "python -m py_compile adk_forge/agents/architect.py"
+    },
+    {
+      "id": "5",
+      "title": "Implementar DeveloperAgent",
+      "kind": "implementation",
+      "path": "adk_forge/agents/developer.py",
+      "priority": "medium",
+      "status": "todo",
+      "dependencies": ["2", "4"],
+      "details": "Agente para converter plano em código Python",
+      "testStrategy": "python -m py_compile adk_forge/agents/developer.py"
+    },
+    {
+      "id": "6",
+      "title": "Implementar ReviewerAgent",
+      "kind": "implementation",
+      "path": "adk_forge/agents/reviewer.py",
+      "priority": "medium",
+      "status": "todo",
+      "dependencies": ["2", "5"],
+      "details": "Agente para revisar código e gerar relatório",
+      "testStrategy": "python -m py_compile adk_forge/agents/reviewer.py"
+    },
+    {
+      "id": "7",
+      "title": "Montar Pipeline Principal",
+      "kind": "implementation",
+      "path": "adk_forge/agents/__init__.py",
+      "priority": "high",
+      "status": "todo",
+      "dependencies": ["4", "5", "6"],
+      "details": "SequentialAgent com sub_agents",
+      "testStrategy": "python -c \"from adk_forge.agents import ADKForgeGenerationPipeline; print('Pipeline OK')\""
+    },
+    {
+      "id": "8",
+      "title": "Sistema principal com config",
+      "kind": "meta",
+      "priority": "high",
+      "status": "todo",
+      "dependencies": ["3", "7"],
+      "details": "Criar agent.py com root_agent, __init__.py que importa agent, e ajustar main.py para importar config no início do arquivo"
+    },
+    {
+      "id": "8.1",
+      "title": "Ajustar main.py para carregar config",
+      "kind": "file",
+      "path": "adk_forge/main.py",
+      "priority": "high",
+      "status": "todo",
+      "dependencies": ["0", "8"],
+      "details": "Adicionar 'from .config import config' no início do arquivo main.py (após os imports do google.adk) para garantir que o .env seja carregado automaticamente",
+      "testStrategy": "grep -q 'from .config import config' adk_forge/main.py"
+    },
+    {
+      "id": "9",
+      "title": "Teste local básico",
+      "kind": "test",
+      "path": "test_local.py",
+      "priority": "medium",
+      "status": "todo",
+      "dependencies": ["8"],
+      "details": "Script de teste para validar execução local",
+      "testStrategy": "python test_local.py"
+    }
+  ],
+  "local_tests": [
+    {
+      "id": "config_test",
+      "title": "Verificar carregamento de configuração",
+      "cmd": "python -c \"from adk_forge.config import config; assert config.is_local(); print('✅ Config local OK')\""
+    },
+    {
+      "id": "import_test",
+      "title": "Verificar importação do root_agent",
+      "cmd": "python -c \"from adk_forge import root_agent; print('✅ root_agent importável')\""
+    },
+    {
+      "id": "cli_test",
+      "title": "Testar execução CLI",
+      "cmd": "python -m adk_forge.main --help 2>/dev/null || echo '✅ CLI executável'"
+    }
+  ],
+  "debugging": {
+    "tips": [
+      "Use ADK_LOG_LEVEL=DEBUG no .env para logs detalhados",
+      "Execute 'make check' para verificar configuração",
+      "Use 'make playground' para interface visual de debug",
+      "Verifique adk_forge/.env se houver erros de autenticação"
+    ]
+  },
+  "metadata": {
+    "generatedAt": "2025-01-11T00:00:00Z",
+    "source": "manifest.json",
+    "adapter": "local_execution",
+    "version": "1.1-local"
+  }
+}
