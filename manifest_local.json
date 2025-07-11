@@ -191,6 +191,17 @@
       "dependencies": ["8"],
       "details": "Script de teste para validar execução local",
       "testStrategy": "python test_local.py"
+    },
+    {
+      "id": "10",
+      "title": "Criar Makefile para comandos locais",
+      "kind": "file",
+      "path": "Makefile",
+      "priority": "low",
+      "status": "todo",
+      "dependencies": ["0"],
+      "details": "Criar Makefile com comandos úteis para desenvolvimento local: setup, install, playground (adk web), api (adk api_server), run (python -m), test, clean, check. Incluir target help como padrão.",
+      "testStrategy": "make help"
     }
   ],
   "local_tests": [
